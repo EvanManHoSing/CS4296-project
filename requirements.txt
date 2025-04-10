@@ -2,3 +2,4 @@ streamlit
 requests
 huggingface-hub
 boto3
+flask

@@ -1,20 +1,10 @@
 import streamlit as st
-from huggingface_hub import InferenceClient
-
-# Load Hugging Face API token from token.txt
-try:
-    with open("token.txt", "r") as file:
-        API_TOKEN = file.read().strip()
-except FileNotFoundError:
-    st.error(
-        "Error: token.txt not found. Please create a token.txt file with your Hugging Face API token."
-    )
-    st.stop()
-
-# Initialize InferenceClient
-client = InferenceClient(api_key=API_TOKEN)
+import requests
 
 st.set_page_config(page_title="🤗💬 HugChat")
+
+# Backend URL (local Flask server)
+BACKEND_URL = "http://localhost:5000/generate"
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -28,17 +18,13 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 
-# Function to query Hugging Face API using InferenceClient
+# Function to call the backend
 def generate_response(prompt):
     try:
-        completion = client.chat.completions.create(
-            model="mistralai/Mixtral-8x7B-Instruct-v0.1",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=100,
-            temperature=0.7,
-        )
-        return completion.choices[0].message.content
-    except Exception as e:
+        response = requests.post(BACKEND_URL, json={"prompt": prompt})
+        response.raise_for_status()  # Raise an error for bad status codes
+        return response.json()["response"]
+    except requests.exceptions.RequestException as e:
         return f"Error: {str(e)}"
 
 
