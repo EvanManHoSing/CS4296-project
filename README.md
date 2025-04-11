@@ -14,7 +14,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"prompt": "Hello, how are 
 ```
 
 ## Step
-0. Put token.txt into key/
+0. Create token.txt in backend/ then paste the API token
 1. create virtual environment
 ```
 python -m venv .venv
