@@ -10,9 +10,7 @@ resource "aws_vpc" "chatbot_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
-  tags = {
-    Name = "chatbot-vpc"
-  }
+  tags = { Name = "chatbot-vpc" }
 }
 
 # Public Subnets
@@ -21,9 +19,7 @@ resource "aws_subnet" "public_subnet_1" {
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
-  tags = {
-    Name = "chatbot-public-subnet-1"
-  }
+  tags = { Name = "chatbot-public-subnet-1" }
 }
 
 resource "aws_subnet" "public_subnet_2" {
@@ -31,17 +27,13 @@ resource "aws_subnet" "public_subnet_2" {
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
-  tags = {
-    Name = "chatbot-public-subnet-2"
-  }
+  tags = { Name = "chatbot-public-subnet-2" }
 }
 
 # Internet Gateway
 resource "aws_internet_gateway" "chatbot_igw" {
   vpc_id = aws_vpc.chatbot_vpc.id
-  tags = {
-    Name = "chatbot-igw"
-  }
+  tags = { Name = "chatbot-igw" }
 }
 
 # Route Table
@@ -51,9 +43,7 @@ resource "aws_route_table" "public" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.chatbot_igw.id
   }
-  tags = {
-    Name = "chatbot-public-rt"
-  }
+  tags = { Name = "chatbot-public-rt" }
 }
 
 # Route Table Associations
@@ -77,61 +67,26 @@ resource "aws_security_group" "lambda_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = {
-    Name = "chatbot-lambda-sg"
-  }
-}
-
-# S3 Bucket
-resource "aws_s3_bucket" "lambda_bucket" {
-  bucket = "cs4296-chatbot-bucket-20250420"
-}
-
-# Upload Lambda function code
-resource "aws_s3_object" "lambda_code" {
-  bucket = aws_s3_bucket.lambda_bucket.id
-  key    = "function.zip"
-  source = "function.zip"
-}
-
-# Secrets Manager for API Token
-resource "aws_secretsmanager_secret" "api_token" {
-  name = "huggingface-api-token-20250422"
-}
-
-resource "aws_secretsmanager_secret_version" "api_token_version" {
-  secret_id     = aws_secretsmanager_secret.api_token.id
-  secret_string = var.hf_api_token
-}
-
-# Secrets Manager VPC Endpoint
-resource "aws_vpc_endpoint" "secretsmanager" {
-  vpc_id              = aws_vpc.chatbot_vpc.id
-  service_name        = "com.amazonaws.us-east-1.secretsmanager"
-  vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id]
-  security_group_ids  = [aws_security_group.lambda_sg.id]
-  private_dns_enabled = true
-  tags = {
-    Name = "chatbot-secretsmanager-endpoint"
-  }
+  tags = { Name = "chatbot-lambda-sg" }
 }
 
 # Lambda Function
 resource "aws_lambda_function" "chatbot_backend" {
   function_name = "ChatbotBackend"
-  s3_bucket     = aws_s3_bucket.lambda_bucket.id
-  s3_key        = aws_s3_object.lambda_code.key
-  runtime       = "python3.12"
-  handler       = "lambda_function.lambda_handler"
+  package_type  = "Image"
+  image_uri     = "856563400605.dkr.ecr.us-east-1.amazonaws.com/chatbot-backend:latest"
   role          = "arn:aws:iam::856563400605:role/LabRole"
-  timeout       = 15
-  memory_size   = 256
+  timeout       = 30
+  memory_size   = 1024
+  environment {
+    variables = {
+      HF_API_TOKEN = var.hf_api_token
+    }
+  }
   vpc_config {
     subnet_ids         = [aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id]
     security_group_ids = [aws_security_group.lambda_sg.id]
   }
-  depends_on = [aws_vpc_endpoint.secretsmanager]
 }
 
 # API Gateway
@@ -167,7 +122,7 @@ resource "aws_api_gateway_deployment" "prod" {
 }
 
 resource "aws_api_gateway_stage" "prod" {
-  rest_api_id   = aws_api_gateway_rest_api.chatbot_api.id
+  rest_api_id   = aws_api_gateway_rest_api.chabot_api.id
   deployment_id = aws_api_gateway_deployment.prod.id
   stage_name    = "prod"
 }
