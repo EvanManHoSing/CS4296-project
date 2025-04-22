@@ -1,2 +1,7 @@
 .venv
 token.txt
+terraform.tfvars 
+*.tfstate 
+*.tfstate.backup
+.terraform
+.terraform.lock.hcl
