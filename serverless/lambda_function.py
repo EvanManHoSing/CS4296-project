@@ -1,30 +1,19 @@
-import json
 import os
+import json
 from huggingface_hub import InferenceClient
 
-# Get API token from environment variable
-API_TOKEN = os.getenv("HF_API_TOKEN")
-
-# Initialize InferenceClient
+API_TOKEN = os.environ.get("HF_API_TOKEN")
 client = InferenceClient(api_key=API_TOKEN)
 
 
 def lambda_handler(event, context):
-    if not API_TOKEN:
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": "API token not available"}),
-            "headers": {"Content-Type": "application/json"},
-        }
-
     try:
-        body = json.loads(event["body"])
-        prompt = body.get("prompt", "")
+        body = json.loads(event.get("body", "{}"))
+        prompt = body.get("prompt")
         if not prompt:
             return {
                 "statusCode": 400,
-                "body": json.dumps({"error": "No prompt provided"}),
-                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"error": "Prompt is required."}),
             }
 
         completion = client.chat.completions.create(
@@ -38,11 +27,10 @@ def lambda_handler(event, context):
         return {
             "statusCode": 200,
             "body": json.dumps({"response": response}),
-            "headers": {"Content-Type": "application/json"},
         }
+
     except Exception as e:
         return {
             "statusCode": 500,
             "body": json.dumps({"error": str(e)}),
-            "headers": {"Content-Type": "application/json"},
         }
