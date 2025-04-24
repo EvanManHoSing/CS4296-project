@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify, g
 from huggingface_hub import InferenceClient
 import os
-import json
 import time
 import logging
 from pythonjsonlogger import jsonlogger
-from datetime import datetime
 
 app = Flask(__name__)
 
