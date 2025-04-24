@@ -21,3 +21,21 @@ variable "hf_api_token" {
   type        = string
   sensitive   = true
 }
+
+variable "key_name" {
+  type        = string
+  description = "Name of existing EC2 key pair"
+  default     = "vockey"
+}
+
+variable "ec2_instance_profile_name" {
+  type        = string
+  description = "IAM instance profile with ECR pull permissions"
+  default     = "LabInstanceProfile"
+}
+
+variable "aws_account_id" {
+  type        = string
+  description = "AWS account ID"
+  default     = "856563400605" # Replace with your actual AWS account ID
+}

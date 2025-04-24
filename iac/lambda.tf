@@ -1,12 +1,3 @@
-provider "aws" {
-  region     = "us-east-1"
-  access_key = var.aws_access_key_id
-  secret_key = var.aws_secret_access_key
-  token      = var.aws_session_token
-}
-
-data "aws_caller_identity" "current" {}
-
 # Lambda Function
 resource "aws_lambda_function" "huggingface_lambda" {
   function_name = "huggingface-lambda"
@@ -77,9 +68,3 @@ resource "aws_lambda_permission" "apigw_invoke" {
   source_arn    = "${aws_apigatewayv2_api.chat_api.execution_arn}/*/*"
 }
 
-# Outputs API Gateway URL
-data "aws_region" "current" {}
-
-output "api_gateway_url" {
-  value = "https://${aws_apigatewayv2_api.chat_api.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/prod/generate"
-}
