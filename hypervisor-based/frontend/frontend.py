@@ -3,6 +3,7 @@ import requests
 import time
 import logging
 from pythonjsonlogger import jsonlogger
+import json
 import os
 
 # Backend URL (local Flask server)
@@ -51,8 +52,9 @@ def generate_response(prompt):
     try:
         response = requests.post(BACKEND_URL, json={"prompt": prompt})
         response.raise_for_status()  # Raise an error for bad status codes
-        data = response.json()
-        return data["response"], data["duration"]
+        lambda_response = response.json()
+        body = json.loads(lambda_response["body"])
+        return body["response"]
     except requests.exceptions.RequestException as e:
         return f"Error: {str(e)}"
 
@@ -67,12 +69,11 @@ if prompt := st.chat_input():
     with st.chat_message("user"):
         st.write(prompt)
     with st.spinner("Thinking..."):
-        response, responseTime = generate_response(prompt)
+        response = generate_response(prompt)
 
         # Displaying the logging data on frontend
         coldTime = log_coldTime(start)
         st.info(f"The cold time is {coldTime} seconds.", icon="⏱️")
-        st.success(f"The response time is {responseTime} seconds.", icon="⏱️")
 
         st.session_state.messages.append({"role": "assistant", "content": response})
         with st.chat_message("assistant"):

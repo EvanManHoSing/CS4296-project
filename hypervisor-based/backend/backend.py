@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, g
 from huggingface_hub import InferenceClient
 import os
+import json
 import time
 import logging
 from pythonjsonlogger import jsonlogger
@@ -72,15 +73,24 @@ def log_response(response):
 @app.route("/generate", methods=["POST"])
 def generate_response():
     if not API_TOKEN:
-        return jsonify({"error": "token.txt not found"}), 500
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": "token.txt not found"}),
+        }, 500
 
     data = request.get_json()
     if not data or "prompt" not in data:
-        return jsonify({"error": "No prompt provided or invalid JSON"}), 400
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "No prompt provided or invalid JSON"}),
+        }, 400
 
     prompt = data["prompt"]
     if not prompt:
-        return jsonify({"error": "Prompt is empty"}), 400
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "Prompt is empty"}),
+        }, 400
 
     log_client(prompt)
 
@@ -95,10 +105,16 @@ def generate_response():
 
         duration = log_response(response)
 
-        return jsonify({"response": response, "duration": duration}), 200
+        return {
+            "statusCode": 200,
+            "body": json.dumps({"response": response}),
+        }, 200
     except Exception as e:
         app.logger.error(f"Error calling Hugging Face API: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": str(e)}),
+        }, 500
 
 
 if __name__ == "__main__":
