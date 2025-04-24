@@ -46,14 +46,10 @@ def mark_start():
 
 
 # Log the response
-
-
 def log_response(response):
     end = time.time()
     duration = round(end - g.start, 5)
-    content_text = ""
-
-    # In case the response is too long
+    content_text = ""  # In case the response is too long
     if len(response) > 50:
         content_text = response[:30] + "..."
     else:
@@ -73,24 +69,15 @@ def log_response(response):
 @app.route("/generate", methods=["POST"])
 def generate_response():
     if not API_TOKEN:
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": "token.txt not found"}),
-        }, 500
+        return jsonify({"error": "token.txt not found"}), 500
 
     data = request.get_json()
     if not data or "prompt" not in data:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"error": "No prompt provided or invalid JSON"}),
-        }, 400
+        return jsonify({"error": "No prompt provided or invalid JSON"}), 400
 
     prompt = data["prompt"]
     if not prompt:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"error": "Prompt is empty"}),
-        }, 400
+        return jsonify({"error": "Prompt is empty"}), 400
 
     log_client(prompt)
 
@@ -105,16 +92,12 @@ def generate_response():
 
         duration = log_response(response)
 
-        return {
-            "statusCode": 200,
-            "body": json.dumps({"response": response}),
-        }, 200
+        # Return response in the expected format
+        return jsonify({"response": response}), 200
+
     except Exception as e:
         app.logger.error(f"Error calling Hugging Face API: {str(e)}")
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": str(e)}),
-        }, 500
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ import os
 # Backend URL (local Flask server)
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000/generate")
 
+
 st.set_page_config(page_title="🤗💬 HugChat")
 
 # Setting up the logger
@@ -51,12 +52,21 @@ def log_coldTime(start):
 def generate_response(prompt):
     try:
         response = requests.post(BACKEND_URL, json={"prompt": prompt})
-        response.raise_for_status()  # Raise an error for bad status codes
+        response.raise_for_status()
         lambda_response = response.json()
-        body = json.loads(lambda_response["body"])
-        return body["response"]
+        print("Lambda response:", lambda_response)
+
+        if "response" in lambda_response:
+            return lambda_response["response"]
+        else:
+            return "Error: No 'response' in body."
+
     except requests.exceptions.RequestException as e:
-        return f"Error: {str(e)}"
+        return f"Request Error: {str(e)}"
+    except KeyError as e:
+        return f"Key Error: {str(e)}"
+    except json.JSONDecodeError as e:
+        return f"JSON Decode Error: {str(e)}"
 
 
 # Handle user input
