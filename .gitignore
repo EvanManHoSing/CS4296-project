@@ -7,3 +7,4 @@ terraform.tfvars
 .terraform.lock.hcl
 lambda_build
 *.zip
+hypervisor-based/.env

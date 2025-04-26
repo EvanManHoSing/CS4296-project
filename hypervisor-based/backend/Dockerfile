@@ -14,4 +14,4 @@ COPY . .
 
 EXPOSE 5000
 
-ENTRYPOINT ["python", "backend.py", "--server.port=5000", "--server.address=0.0.0.0"]
+ENTRYPOINT ["python", "backend.py"]

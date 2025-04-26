@@ -9,6 +9,6 @@ resource "aws_instance" "app_server" {
   user_data = file("${path.module}/scripts/ec2-user-data.sh")
 
   tags = {
-    Name = "HuggingFaceEC23"
+    Name = "HuggingFaceEC24"
   }
 }

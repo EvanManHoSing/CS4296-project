@@ -17,14 +17,11 @@ logger.addHandler(logHandler)
 logger.setLevel(logging.INFO)
 logging.getLogger("werkzeug").disabled = True
 
-# Get the directory where backend.py is located
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TOKEN_PATH = os.path.join(BASE_DIR, "token.txt")
 
-# Load Hugging Face API token from token.txt
+# Load Hugging Face API token from environment variable
 try:
-    with open(TOKEN_PATH, "r") as file:
-        API_TOKEN = file.read().strip()
+    API_TOKEN = os.getenv("HF_API_TOKEN")
+
 except FileNotFoundError:
     API_TOKEN = None
 
