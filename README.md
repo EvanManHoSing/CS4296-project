@@ -1,33 +1,49 @@
-# CS4296-project
-Research on both serverless (AWS Fargate + Lambda) and hypervisor-based (AWS EC2 with Docker) approaches are viable, with trade-offs in cost and scalability.
+# CS4296 Project - Serverless vs Hypervisor-based Deployment
 
-## Step to deploy on AWS
-0. Make sure you have install Docker, AWS CLI and Terraform
-1. configure AWS CLI
+This project researches and compares two cloud deployment architectures for a web-based LLM chatbot:
+
+- **Serverless architecture** using AWS Fargate and Lambda
+- **Hypervisor-based architecture** using AWS EC2 and Docker
+
+Both approaches have trade-offs in terms of **cost**, **scalability**, and **performance**.
+
+---
+
+## Deployment Guide on AWS
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-started/get-docker/)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+
+Make sure Docker, AWS CLI, and Terraform are installed and properly configured.
+
+---
+
+### Step 1: Configure AWS CLI
 ```
 aws configure
-```
-
-```
 aws configure set aws_session_token <your-session-token>
 ```
-1. Configure Terraform
-create terraform.tfvars in iac/
-use terraform.tfvars.example to make your own tfvars.
 
+### Step 2: Configure Terraform
+Create your own terraform.tfvars file under the iac/ directory.
 
-2. Docker Build and push to AWS ECR
+You can use terraform.tfvars.example as a template.
+
+### Step 3: Docker Build and Push to AWS ECR
+Build Docker Images
 ```
-# Navigate to backend directory
-cd backend
+# Backend
+cd hypervisor-based/backend
 docker build -t my-backend .
 
-# Navigate to frontend directory
+# Frontend
 cd ../frontend
 docker build -t my-frontend .
 ```
 
-Authenticate Docker to ECR
+Authenticate Docker to AWS ECR
 ```
 aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
 ```
@@ -35,82 +51,72 @@ aws ecr get-login-password --region <your-region> | docker login --username AWS 
 Create ECR Repositories
 ```
 aws ecr create-repository --repository-name my-backend
-```
-```
 aws ecr create-repository --repository-name my-frontend
 ```
 
-Tag and Push
-
-Tag
+Tag and Push Images
 ```
 docker tag my-backend <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-backend
-```
-```
 docker tag my-frontend <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-frontend
-```
 
-Push
-```
 docker push <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-backend
-```
-```
 docker push <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-frontend
 ```
 
-3. Use Terraform to deploy on AWS
-First, cd back to iac/
+Step 4: Deploy Using Terraform
 ```
+cd ../../iac
 terraform init
-```
-```
 terraform plan
-```
-```
 terraform apply
 ```
 
-
-## Step for test locally
-0. ~~Create token.txt in backend/ then paste the API token~~
-use environment variable now.
+---
+## Testing Locally
+### Step 0: Set Hugging Face API Token
+Linux / macOS:
 ```
 export HF_API_TOKEN="your HF_API_TOKEN"
 ```
-or
+Windows (PowerShell):
 ```
 $env:HF_API_TOKEN = "your HF_API_TOKEN"
 ```
 
-1. create virtual environment
+### Step 1: Create Virtual Environment
 ```
 python -m venv .venv
-```
-  or
-```
+# or
 python3 -m venv .venv
 ```
-2. activate venv
+
+### Step 2: Activate Virtual Environment
+Linux / macOS:
 ```
 source .venv/bin/activate
 ```
-  or
+
+Windows (PowerShell):
 ```
 .\.venv\Scripts\Activate.ps1
 ```
-3. install requirement
+
+### Step 3: Install Requirements
 ```
 pip install -r requirements.txt
 ```
 
-4. run frontend and backend
+### Step 4: Run Frontend and Backend
 ```
-python backend/backend.py
+# Backend
+python hypervisor-based/backend/backend.py
+
+# Frontend
+streamlit run hypervisor-based/frontend/frontend.py
 ```
-```
-streamlit run frontend.py
-```
-## backend test command
+
+### Local Backend Test Command
 ```
 curl -X POST -H "Content-Type: application/json" -d '{"prompt": "Hello, how are you?"}' http://localhost:5000/generate
 ```
+
