@@ -6,7 +6,9 @@ resource "aws_instance" "app_server" {
   associate_public_ip_address = true
   iam_instance_profile        = var.ec2_instance_profile_name
 
-  user_data = file("${path.module}/scripts/ec2-user-data.sh")
+  user_data = templatefile("${path.module}/scripts/ec2-user-data.sh", {
+    huggingface_api_key = var.hf_api_token
+  })
 
   tags = {
     Name = "HuggingFaceEC24"

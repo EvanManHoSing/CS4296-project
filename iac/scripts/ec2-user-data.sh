@@ -21,20 +21,21 @@ sudo chmod +x /usr/local/bin/docker-compose
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 856563400605.dkr.ecr.us-east-1.amazonaws.com
 
 # Pull images
-docker pull 856563400605.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
-docker pull 856563400605.dkr.ecr.us-east-1.amazonaws.com/backend:latest
+docker pull 856563400605.dkr.ecr.us-east-1.amazonaws.com/my-frontend:latest
+docker pull 856563400605.dkr.ecr.us-east-1.amazonaws.com/my-backend:latest
 
 # Create .env file for backend
 cat <<EOF > /home/ec2-user/.env
-HF_API_KEY=your-huggingface-api-key
+HF_API_TOKEN=${huggingface_api_key}
 EOF
+
 
 # Create docker-compose.yml
 cat <<EOF > /home/ec2-user/docker-compose.yml
 version: "3.8"
 services:
   backend:
-    image: 856563400605.dkr.ecr.us-east-1.amazonaws.com/huggingface-backend:latest
+    image: 856563400605.dkr.ecr.us-east-1.amazonaws.com/my-backend:latest
     container_name: huggingface-backend
     ports:
       - "5000:5000"
@@ -43,7 +44,7 @@ services:
     restart: always
 
   frontend:
-    image: 856563400605.dkr.ecr.us-east-1.amazonaws.com/huggingface-frontend:latest
+    image: 856563400605.dkr.ecr.us-east-1.amazonaws.com/my-frontend:latest
     container_name: huggingface-frontend
     ports:
       - "8501:8501"

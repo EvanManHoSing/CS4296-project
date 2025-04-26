@@ -11,6 +11,10 @@ aws configure
 ```
 aws configure set aws_session_token <your-session-token>
 ```
+1. Configure Terraform
+create terraform.tfvars in iac/
+use terraform.tfvars.example to make your own tfvars.
+
 
 2. Docker Build and push to AWS ECR
 ```
@@ -31,21 +35,40 @@ aws ecr get-login-password --region <your-region> | docker login --username AWS 
 Create ECR Repositories
 ```
 aws ecr create-repository --repository-name my-backend
+```
+```
 aws ecr create-repository --repository-name my-frontend
 ```
 
 Tag and Push
-```
-# Tag
-docker tag my-backend <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-backend
-docker tag my-frontend <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-frontend
 
-# Push
+Tag
+```
+docker tag my-backend <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-backend
+```
+```
+docker tag my-frontend <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-frontend
+```
+
+Push
+```
 docker push <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-backend
+```
+```
 docker push <your-account-id>.dkr.ecr.<region>.amazonaws.com/my-frontend
 ```
 
-
+3. Use Terraform to deploy on AWS
+First, cd back to iac/
+```
+terraform init
+```
+```
+terraform plan
+```
+```
+terraform apply
+```
 
 
 ## Step for test locally

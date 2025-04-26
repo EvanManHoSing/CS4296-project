@@ -13,7 +13,7 @@ resource "aws_ecs_task_definition" "frontend" {
   container_definitions = jsonencode([
     {
       name      = "frontend"
-      image     = "856563400605.dkr.ecr.us-east-1.amazonaws.com/frontend:latest"
+      image     = "856563400605.dkr.ecr.us-east-1.amazonaws.com/my-frontend:latest"
       essential = true
       portMappings = [{
         containerPort = 8501
@@ -23,7 +23,7 @@ resource "aws_ecs_task_definition" "frontend" {
       environment = [
         {
           name  = "BACKEND_URL"
-          value = "https://di5zl9r1i3.execute-api.us-east-1.amazonaws.com/prod/generate"
+          value = "https://${aws_apigatewayv2_api.chat_api.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/prod/generate"
         }
       ]
     }
